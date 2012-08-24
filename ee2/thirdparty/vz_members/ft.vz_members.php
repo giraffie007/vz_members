@@ -74,12 +74,32 @@ class Vz_members_ft extends EE_Fieldtype {
                 label.vz_member:hover, label.vz_member:focus { background:#f7fafc; -webkit-box-shadow:0 0 5px #abd9f4; -moz-box-shadow:0 0 5px #abd9f4; box-shadow:0 0 5px #abd9f4; }
                 label.vz_member.checked { background:#b6babf; color:#fff; text-shadow:0 -1px rgba(0,0,0,0.2); background:-webkit-gradient(linear, 0 0, 0 100%, from(#aaaeb3), to(#b6babf)); background:-moz-linear-gradient(top, #aaaeb3, #b6babf); border-color:#a7b4c2; -webkit-box-shadow:inset 0 1px rgba(0,0,0,0.1); -moz-box-shadow:inset 0 1px 3px rgba(0,0,0,0.1); box-shadow:inset 0 1px 3px rgba(0,0,0,0.1); }
                 label.vz_member input { position:absolute; left:-9999px; }
+                div.searchWrap { float:left; width:100%;}
+                input#vz_search { width:200px; margin:10px 0px;}
             </style>');
             $this->EE->javascript->output(
                 'jQuery(document).ready(function($) {
                     $(".vz_member input").live("change", function() {
                         $(this).parent().toggleClass("checked");
                     });
+                    
+                    $("#vz_search").keyup(function(){
+ 
+                        // Declare var to retrieve # of Members the filter returns
+                        var memberFilter = $(this).val(), count = 0;
+
+                        // Loop and fadeOut all the members that do not match the filter
+                        $(".vz_member").each(function(){
+
+                            if ($(this).text().search(new RegExp(memberFilter, "i")) < 0) {
+                                $(this).hide();
+                            } else {
+                                $(this).show();
+                                count++;
+                            }
+                        });
+                    });
+                    
                 });'
             );
 
@@ -265,8 +285,10 @@ class Vz_members_ft extends EE_Fieldtype {
         }
         else // Checkbox mode
         {
+            $r .= '<div class="searchWrap"><input type="text" id="vz_search" placeholder="Filter Members"/></div>';
             foreach ($members as $member)
             {
+                
                 // If we are moving on to a new group
                 if ($current_group != $member['group_id'])
                 {
@@ -276,6 +298,7 @@ class Vz_members_ft extends EE_Fieldtype {
                     // Output the group header
                     $r .= '<div style="clear:left"></div>';
                     $r .= '<div class="defaultBold vz_members_group">'.$member['group_title'].':</div>';
+                    
                 }
 
                 // Is it selected?
@@ -287,7 +310,7 @@ class Vz_members_ft extends EE_Fieldtype {
                     . $member['screen_name']
                     . '</label>';
             }
-
+            
             // Fool the form into working
             $r .= form_hidden($field_name.'[]', 'temp');
 
